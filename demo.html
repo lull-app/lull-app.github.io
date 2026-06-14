@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lull Demo</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #0a0a0b;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.editor-frame {
+  width: 640px;
+  background: #1a1a1e;
+  border-radius: 12px;
+  border: 1px solid #2a2a30;
+  overflow: hidden;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+}
+
+.editor-titlebar {
+  background: #141417;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid #222228;
+}
+.dot { width: 12px; height: 12px; border-radius: 50%; }
+.dot.red { background: #ff5f57; }
+.dot.yellow { background: #febc2e; }
+.dot.green { background: #28c840; }
+.editor-title { margin-left: 8px; color: #5a5a66; font-size: 13px; }
+
+.editor-body {
+  display: flex;
+  height: 360px;
+}
+
+.sidebar {
+  width: 48px;
+  background: #111115;
+  border-right: 1px solid #1e1e24;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 12px;
+  gap: 16px;
+}
+.sidebar-icon {
+  width: 24px; height: 24px; border-radius: 6px;
+  background: #26262c;
+  display: flex; align-items: center; justify-content: center;
+}
+.sidebar-icon.active { background: #3ecf8e22; }
+.sidebar-icon svg { opacity: 0.5; }
+.sidebar-icon.active svg { opacity: 1; }
+
+.code-area {
+  flex: 1;
+  padding: 20px;
+  overflow: hidden;
+  position: relative;
+}
+
+.code-line { height: 14px; margin-bottom: 10px; border-radius: 3px; }
+.cl1 { background: #252530; width: 45%; }
+.cl2 { background: #252530; width: 70%; }
+.cl3 { background: #252530; width: 30%; }
+.cl4 { background: #252530; width: 55%; }
+.cl5 { background: #252530; width: 80%; }
+.cl6 { background: #252530; width: 20%; }
+
+.status-bar {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: #111115;
+  border-top: 1px solid #1e1e24;
+  padding: 5px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: #555560;
+}
+.spinner-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #8b8b94;
+}
+.spin {
+  width: 12px; height: 12px;
+  border: 1.5px solid #2c2c32;
+  border-top-color: #3ecf8e;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.ad-panel {
+  width: 220px;
+  background: #111115;
+  border-left: 1px solid #1e1e24;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.ad-panel-header {
+  padding: 10px 14px 8px;
+  font-size: 10px;
+  color: #3a3a44;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  border-bottom: 1px solid #1a1a20;
+}
+
+.ad-card {
+  padding: 16px 14px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: fadeIn 0.5s ease;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+.ad-logo-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ad-logo {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 16px;
+  color: #07120d;
+  flex-shrink: 0;
+}
+.ad-company { font-weight: 600; font-size: 14px; color: #ededf0; }
+.ad-tagline { font-size: 12px; color: #7a7a84; line-height: 1.5; }
+.ad-cta {
+  display: inline-block;
+  padding: 7px 12px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  width: 100%;
+  text-align: center;
+  color: #07120d;
+  margin-top: auto;
+}
+
+.earnings-row {
+  padding: 10px 14px;
+  border-top: 1px solid #1a1a20;
+  font-size: 11px;
+  color: #3ecf8e;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.earnings-label { color: #3a3a44; }
+
+.lull-badge {
+  position: absolute;
+  bottom: 6px; right: 8px;
+  font-size: 9px;
+  color: #2a2a36;
+  letter-spacing: 0.3px;
+}
+</style>
+</head>
+<body>
+
+<div class="editor-frame">
+  <div class="editor-titlebar">
+    <span class="dot red"></span>
+    <span class="dot yellow"></span>
+    <span class="dot green"></span>
+    <span class="editor-title">server.ts — Cursor</span>
+  </div>
+  <div class="editor-body">
+    <div class="sidebar">
+      <div class="sidebar-icon">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#aaa" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      </div>
+      <div class="sidebar-icon">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#aaa" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </div>
+      <div class="sidebar-icon active">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#3ecf8e" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </div>
+    </div>
+    <div class="code-area">
+      <div class="code-line cl1"></div>
+      <div class="code-line cl2"></div>
+      <div class="code-line cl3"></div>
+      <div class="code-line cl4"></div>
+      <div class="code-line cl5"></div>
+      <div class="code-line cl1"></div>
+      <div class="code-line cl6"></div>
+      <div class="code-line cl4"></div>
+      <div class="code-line cl2"></div>
+      <div class="code-line cl3"></div>
+      <div class="code-line cl5"></div>
+      <div class="code-line cl1"></div>
+      <div class="status-bar">
+        <div class="spinner-text"><span class="spin"></span> Cursor is thinking…</div>
+      </div>
+    </div>
+
+    <div class="ad-panel">
+      <div class="ad-panel-header">Sponsored</div>
+      <div class="ad-card" id="adCard">
+        <div class="ad-logo-row">
+          <div class="ad-logo" id="adLogo" style="background:#3ecf8e;">S</div>
+          <div class="ad-company" id="adCompany">Supabase</div>
+        </div>
+        <div class="ad-tagline" id="adTagline">Postgres, but you'll actually ship this weekend.</div>
+        <a class="ad-cta" id="adCta" href="#" style="background:#3ecf8e;">supabase.com →</a>
+      </div>
+      <div class="earnings-row">
+        <span class="earnings-label">Earned today</span>
+        <span>$0.04</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const ads = [
+  { logo: 'S', company: 'Supabase',  tagline: "Postgres, but you'll actually ship this weekend.", cta: 'supabase.com →', color: '#3ecf8e', href: 'https://supabase.com' },
+  { logo: 'R', company: 'Railway',   tagline: 'Deploy any project in seconds. No DevOps required.', cta: 'railway.app →', color: '#b835ff', href: 'https://railway.app' },
+  { logo: '✈', company: 'Fly.io',   tagline: 'Run your apps close to your users. Globally.', cta: 'fly.io →', color: '#7b61ff', href: 'https://fly.io' },
+  { logo: '✉', company: 'Resend',   tagline: 'The email API devs actually love. Ship faster.', cta: 'resend.com →', color: '#f97316', href: 'https://resend.com' },
+  { logo: 'L', company: 'Linear',   tagline: 'The issue tracker built for high-performance teams.', cta: 'linear.app →', color: '#5e6ad2', href: 'https://linear.app' },
+];
+
+// Check URL param for a specific company
+const params = new URLSearchParams(location.search);
+const companyParam = params.get('company');
+let currentIndex = companyParam ? ads.findIndex(a => a.company.toLowerCase() === companyParam.toLowerCase()) : 0;
+if (currentIndex < 0) currentIndex = 0;
+
+function showAd(idx) {
+  const a = ads[idx];
+  const card = document.getElementById('adCard');
+  card.style.opacity = 0;
+  setTimeout(() => {
+    document.getElementById('adLogo').textContent = a.logo;
+    document.getElementById('adLogo').style.background = a.color;
+    document.getElementById('adCompany').textContent = a.company;
+    document.getElementById('adTagline').textContent = a.tagline;
+    const cta = document.getElementById('adCta');
+    cta.textContent = a.cta;
+    cta.style.background = a.color;
+    cta.href = a.href;
+    card.style.transition = 'opacity 0.4s';
+    card.style.opacity = 1;
+  }, 200);
+}
+
+showAd(currentIndex);
+
+// Only rotate if no company param
+if (!companyParam) {
+  setInterval(() => {
+    currentIndex = (currentIndex + 1) % ads.length;
+    showAd(currentIndex);
+  }, 3000);
+}
+</script>
+
+</body>
+</html>
