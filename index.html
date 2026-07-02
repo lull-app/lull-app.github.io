@@ -211,16 +211,23 @@ h1 .pale { color: var(--dim); }
 .demo-title { font-size:11px; color:var(--muted); margin-left:4px; }
 .demo-body { padding:16px; }
 .demo-toprow { display:flex; align-items:center; justify-content:space-between; margin-bottom:13px; }
-.demo-spinner-row { display:flex; align-items:center; gap:7px; font-size:12px; color:var(--muted); }
+.demo-spinner-row { display:flex; align-items:center; gap:7px; font-size:12px; color:var(--muted); transition:color .3s; }
+.demo-spinner-row.done { color:var(--accent3); }
 .spin { width:13px; height:13px; border:1.5px solid var(--border2); border-top-color:var(--accent2); border-radius:50%; animation:spin .7s linear infinite; flex-shrink:0; }
 @keyframes spin { to { transform:rotate(360deg); } }
+.spin-check { display:none; flex-shrink:0; }
+.demo-spinner-row.done .spin { display:none; }
+.demo-spinner-row.done .spin-check { display:inline-flex; animation:checkPop .35s cubic-bezier(.34,1.56,.64,1); }
+@keyframes checkPop { 0%{ transform:scale(.4); opacity:0; } 100%{ transform:scale(1); opacity:1; } }
 .demo-spons { font-size:9px; color:var(--dim); text-transform:uppercase; letter-spacing:.6px; }
 
 .ad-card {
   background:linear-gradient(145deg,#151220,#100d18);
   border:1px solid var(--border2); border-radius:12px; overflow:hidden;
-  transition: transform .35s cubic-bezier(.34,1.56,.64,1);
+  transition: transform .4s cubic-bezier(.34,1.56,.64,1), opacity .4s ease;
 }
+.ad-card.pending { opacity:.14; transform:scale(.94) translateY(4px); }
+.ad-card.resolved { opacity:1; transform:scale(1) translateY(0); }
 .ad-card.swap { transform:scale(1.025) rotate(-0.3deg); }
 .ad-accent { height:2px; }
 .ad-inner { padding:13px; }
@@ -448,10 +455,10 @@ footer { border-top:1px solid var(--border); padding:28px 48px; display:flex; al
       </div>
       <div class="demo-body">
         <div class="demo-toprow">
-          <div class="demo-spinner-row"><div class="spin"></div> Claude is thinking…</div>
+          <div class="demo-spinner-row" id="spinnerRow"><div class="spin" id="spinIcon"></div><svg class="spin-check" id="spinCheck" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> <span id="spinnerLabel">Claude Code is thinking…</span></div>
           <span class="demo-spons">Sponsored</span>
         </div>
-        <div class="ad-card" id="adCard">
+        <div class="ad-card pending" id="adCard">
           <div class="ad-accent" id="dAccent"></div>
           <div class="ad-inner">
             <div class="ad-brand">
@@ -688,8 +695,33 @@ function render(a){
     setTimeout(()=>card.classList.remove('swap'),350);
   },280);
 }
-render(ads[0]);
-setInterval(()=>{ i=(i+1)%ads.length; render(ads[i]); },2800);
+const THINK_MS = 900;
+const HOLD_MS = 2300;
+function setPhase(thinking){
+  const row=document.getElementById('spinnerRow');
+  const label=document.getElementById('spinnerLabel');
+  const card=document.getElementById('adCard');
+  if(thinking){
+    row.classList.remove('done');
+    label.textContent='Claude Code is thinking…';
+    card.classList.remove('resolved');
+    card.classList.add('pending');
+  } else {
+    row.classList.add('done');
+    label.textContent='Done — card shown below';
+    card.classList.remove('pending');
+    card.classList.add('resolved');
+  }
+}
+function cycle(){
+  setPhase(true);
+  setTimeout(()=>{
+    render(ads[i]);
+    setPhase(false);
+    setTimeout(()=>{ i=(i+1)%ads.length; cycle(); }, HOLD_MS);
+  }, THINK_MS);
+}
+cycle();
 
 // scroll reveal
 const revealEls = document.querySelectorAll('.reveal');
