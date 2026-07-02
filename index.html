@@ -3,23 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lull — Paid for the pause</title>
-<meta name="description" content="Lull shows one quiet ad while Claude or Cursor generates. You keep 70% of the revenue. Automatically.">
+<title>lull — Get paid to stare at a spinner</title>
+<meta name="description" content="lull drops one tiny sponsor card into your IDE's loading spinner. You keep 70% of the revenue. Zero setup, zero data creepiness.">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 :root {
-  --bg:      #080807;
-  --bg2:     #0e0d0b;
-  --card:    #121109;
-  --border:  #1c1b16;
-  --border2: #272520;
-  --text:    #f0ede6;
-  --muted:   #6b6760;
-  --dim:     #38362f;
-  --accent:  #c9a96e;
-  --accent2: #b8924f;
-  --accent3: #e2c97e;
+  --bg:      #0a0a0f;
+  --bg2:     #120f1c;
+  --card:    #17141f;
+  --border:  #251f34;
+  --border2: #332c48;
+  --text:    #f7f4ff;
+  --muted:   #9b93b0;
+  --dim:     #4e4868;
+  --accent:  #d7ff3f;
+  --accent2: #ff4d94;
+  --accent3: #5eead4;
+  --ink:     #0a0a0f;
 }
 
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -36,12 +37,19 @@ body {
 /* ── LOGO (always B&W) ── */
 .lull-logo-svg { display:block; }
 
+/* ── FLOATING BLOBS ── */
+.blob { position:absolute; border-radius:50%; filter:blur(90px); pointer-events:none; z-index:0; }
+.blob1 { width:420px; height:420px; background:rgba(255,77,148,0.14); top:-120px; left:-100px; animation:drift1 22s ease-in-out infinite; }
+.blob2 { width:380px; height:380px; background:rgba(94,234,212,0.12); bottom:-140px; right:-80px; animation:drift2 26s ease-in-out infinite; }
+@keyframes drift1 { 0%,100%{ transform:translate(0,0); } 50%{ transform:translate(60px,40px); } }
+@keyframes drift2 { 0%,100%{ transform:translate(0,0); } 50%{ transform:translate(-50px,-30px); } }
+
 /* ── NAV ── */
 nav {
   position:fixed; top:0; left:0; right:0; z-index:100;
   padding: 18px 48px;
   display:flex; align-items:center; justify-content:space-between;
-  background: rgba(8,8,7,0.88);
+  background: rgba(10,10,15,0.85);
   backdrop-filter: blur(24px);
   border-bottom: 1px solid var(--border2);
 }
@@ -56,18 +64,26 @@ nav {
   border-radius:7px;
   display:flex; align-items:center; justify-content:center;
   background: var(--card);
+  transition: transform .3s cubic-bezier(.34,1.56,.64,1), border-color .3s;
 }
+.nav-logo:hover .nav-icon { transform:rotate(-14deg) scale(1.08); border-color:var(--accent2); }
 .nav-links { display:flex; align-items:center; gap:28px; }
-.nav-links a { color:var(--muted); text-decoration:none; font-size:14px; font-weight:500; transition:color .2s; }
-.nav-links a:hover { color:var(--text); }
+.nav-links a:not(.btn-nav) { position:relative; color:var(--muted); text-decoration:none; font-size:14px; font-weight:500; transition:color .2s; }
+.nav-links a:not(.btn-nav)::after {
+  content:''; position:absolute; left:0; right:0; bottom:-5px; height:2px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  transform:scaleX(0); transform-origin:left; transition:transform .25s ease;
+}
+.nav-links a:not(.btn-nav):hover { color:var(--text); }
+.nav-links a:not(.btn-nav):hover::after { transform:scaleX(1); }
 .btn-nav {
   background: var(--accent);
-  color: #0e0c07;
+  color: var(--ink);
   font-size:14px; font-weight:700;
   padding:9px 20px; border-radius:8px;
-  text-decoration:none; transition:opacity .2s;
+  text-decoration:none; transition:transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .2s;
 }
-.btn-nav:hover { opacity:.85; }
+.btn-nav:hover { transform:translateY(-2px) rotate(-1deg); box-shadow:0 8px 20px rgba(215,255,63,0.25); }
 
 /* ── HERO ── */
 .hero {
@@ -80,14 +96,16 @@ nav {
 .hero::before {
   content:'';
   position:absolute; inset:0;
-  background: radial-gradient(ellipse 70% 60% at 50% 40%, rgba(201,169,110,0.06) 0%, transparent 70%);
+  background: radial-gradient(ellipse 70% 60% at 50% 40%, rgba(215,255,63,0.07) 0%, transparent 70%);
   pointer-events:none;
 }
 .hero-wm {
   position:absolute; top:50%; left:50%;
   transform:translate(-50%,-52%);
-  opacity:.025; pointer-events:none;
+  opacity:.03; pointer-events:none;
+  animation: spinSlow 90s linear infinite;
 }
+@keyframes spinSlow { to { transform:translate(-50%,-52%) rotate(360deg); } }
 
 .eyebrow {
   display:inline-flex; align-items:center; gap:8px;
@@ -97,7 +115,9 @@ nav {
   font-size:11px; font-weight:600; letter-spacing:.8px; text-transform:uppercase;
   padding:6px 14px; border-radius:20px;
   margin-bottom:36px;
+  transition: transform .2s, border-color .2s;
 }
+.eyebrow:hover { transform:rotate(-1deg) scale(1.03); border-color:rgba(215,255,63,0.35); }
 .eyebrow-pulse {
   width:6px; height:6px; border-radius:50%;
   background: var(--accent);
@@ -111,13 +131,17 @@ h1 {
   margin-bottom:30px; max-width:880px;
 }
 h1 .grad {
-  background: linear-gradient(120deg, var(--accent3) 0%, var(--accent) 60%, #a07840 100%);
+  background: linear-gradient(120deg, var(--accent3) 0%, var(--accent) 45%, var(--accent2) 100%);
+  background-size: 200% auto;
   -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  animation: gradShift 6s ease-in-out infinite;
+  display:inline-block;
 }
+@keyframes gradShift { 0%,100%{ background-position:0% 50%; } 50%{ background-position:100% 50%; } }
 h1 .pale { color: var(--dim); }
 
 .hero-sub {
-  font-size:19px; color:var(--muted); max-width:500px;
+  font-size:19px; color:var(--muted); max-width:520px;
   margin: 0 auto 48px; font-weight:400; line-height:1.7;
 }
 
@@ -126,12 +150,19 @@ h1 .pale { color: var(--dim); }
 .btn-primary {
   display:inline-flex; align-items:center; gap:8px;
   background: var(--accent);
-  color: #0a0901;
+  color: var(--ink);
   font-size:15px; font-weight:700;
   padding:15px 30px; border-radius:10px;
-  text-decoration:none; transition:opacity .2s, transform .15s;
+  text-decoration:none; transition:transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s;
+  position:relative; overflow:hidden;
 }
-.btn-primary:hover { opacity:.88; transform:translateY(-1px); }
+.btn-primary::after {
+  content:''; position:absolute; top:0; left:-60%; width:40%; height:100%;
+  background:linear-gradient(120deg, transparent, rgba(255,255,255,.55), transparent);
+  transform:skewX(-20deg); transition:left .55s ease;
+}
+.btn-primary:hover { transform:translateY(-3px) rotate(-0.8deg); box-shadow:0 14px 30px rgba(215,255,63,0.28); }
+.btn-primary:hover::after { left:130%; }
 
 .btn-ghost {
   display:inline-flex; align-items:center; gap:8px;
@@ -140,9 +171,9 @@ h1 .pale { color: var(--dim); }
   padding:15px 22px; border-radius:10px;
   text-decoration:none;
   border: 1px solid var(--border2);
-  transition:all .15s;
+  transition:all .2s cubic-bezier(.34,1.56,.64,1);
 }
-.btn-ghost:hover { color:var(--text); border-color:var(--dim); }
+.btn-ghost:hover { color:var(--text); border-color:var(--accent3); transform:translateY(-3px) rotate(0.8deg); }
 
 .hero-note { font-size:12px; color:var(--dim); }
 
@@ -154,18 +185,22 @@ h1 .pale { color: var(--dim); }
 }
 .demo-glow {
   position:absolute; inset:-40px;
-  background:radial-gradient(ellipse, rgba(201,169,110,0.1) 0%, transparent 65%);
+  background:radial-gradient(ellipse, rgba(255,77,148,0.14) 0%, transparent 65%);
   pointer-events:none;
+  animation: glowPulse 4s ease-in-out infinite;
 }
+@keyframes glowPulse { 0%,100%{ opacity:.7; } 50%{ opacity:1; } }
 .demo {
   position:relative; z-index:1;
   background: var(--card);
   border: 1px solid var(--border2);
   border-radius:16px; overflow:hidden;
-  box-shadow: 0 32px 64px rgba(0,0,0,0.5);
+  box-shadow: 0 32px 64px rgba(0,0,0,0.55);
+  transition: transform .4s cubic-bezier(.34,1.56,.64,1);
 }
+.demo:hover { transform:translateY(-6px) rotate(-0.4deg); }
 .demo-bar {
-  background:#111009;
+  background:#141019;
   padding:11px 14px;
   display:flex; align-items:center; gap:10px;
   border-bottom:1px solid var(--border);
@@ -177,14 +212,16 @@ h1 .pale { color: var(--dim); }
 .demo-body { padding:16px; }
 .demo-toprow { display:flex; align-items:center; justify-content:space-between; margin-bottom:13px; }
 .demo-spinner-row { display:flex; align-items:center; gap:7px; font-size:12px; color:var(--muted); }
-.spin { width:13px; height:13px; border:1.5px solid var(--border2); border-top-color:var(--accent); border-radius:50%; animation:spin .7s linear infinite; flex-shrink:0; }
+.spin { width:13px; height:13px; border:1.5px solid var(--border2); border-top-color:var(--accent2); border-radius:50%; animation:spin .7s linear infinite; flex-shrink:0; }
 @keyframes spin { to { transform:rotate(360deg); } }
 .demo-spons { font-size:9px; color:var(--dim); text-transform:uppercase; letter-spacing:.6px; }
 
 .ad-card {
-  background:linear-gradient(145deg,#0f0e0a,#0c0b08);
+  background:linear-gradient(145deg,#151220,#100d18);
   border:1px solid var(--border2); border-radius:12px; overflow:hidden;
+  transition: transform .35s cubic-bezier(.34,1.56,.64,1);
 }
+.ad-card.swap { transform:scale(1.025) rotate(-0.3deg); }
 .ad-accent { height:2px; }
 .ad-inner { padding:13px; }
 .ad-brand { display:flex; align-items:center; gap:9px; margin-bottom:8px; }
@@ -194,7 +231,7 @@ h1 .pale { color: var(--dim); }
   font-weight:800; font-size:16px;
   transition: background .35s, color .35s, border-color .35s;
 }
-.ad-name { font-size:13px; font-weight:700; color:#ece8de; }
+.ad-name { font-size:13px; font-weight:700; color:#f1eefb; }
 .ad-tag { font-size:11px; color:var(--muted); line-height:1.55; margin-bottom:11px; }
 .ad-cta {
   display:inline-flex; align-items:center; gap:4px;
@@ -209,14 +246,17 @@ h1 .pale { color: var(--dim); }
 
 /* ── STATS ── */
 .stats { display:flex; justify-content:center; max-width:680px; margin:80px auto 0; border:1px solid var(--border2); border-radius:14px; overflow:hidden; }
-.stat { flex:1; padding:28px 20px; text-align:center; border-right:1px solid var(--border2); background:var(--card); }
+.stat { flex:1; padding:28px 20px; text-align:center; border-right:1px solid var(--border2); background:var(--card); transition:background .25s; }
+.stat:hover { background:var(--bg2); }
 .stat:last-child { border-right:none; }
 .stat-n { font-size:34px; font-weight:800; letter-spacing:-0.04em; color:var(--accent); }
+.stat:nth-child(2) .stat-n { color:var(--accent2); }
+.stat:nth-child(3) .stat-n { color:var(--accent3); }
 .stat-l { font-size:12px; color:var(--muted); margin-top:5px; }
 
 /* ── SECTIONS ── */
 .section { padding:96px 24px; }
-.wrap { max-width:980px; margin:0 auto; }
+.wrap { max-width:980px; margin:0 auto; position:relative; }
 .label {
   display:inline-flex; align-items:center; gap:8px;
   font-size:11px; font-weight:600; letter-spacing:1px; text-transform:uppercase;
@@ -228,26 +268,37 @@ h2 {
   font-weight:800; letter-spacing:-0.03em; line-height:1.1;
   margin-bottom:14px;
 }
-.sub { color:var(--muted); font-size:17px; max-width:520px; line-height:1.7; margin-bottom:52px; }
+.sub { color:var(--muted); font-size:17px; max-width:540px; line-height:1.7; margin-bottom:52px; }
+
+/* ── SCROLL REVEAL ── */
+.reveal { opacity:0; transform:translateY(26px); transition:opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1); }
+.reveal.in-view { opacity:1; transform:translateY(0); }
 
 /* ── STEPS ── */
 .steps { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; }
-.step { background:var(--card); padding:34px 26px; }
+.step { background:var(--card); padding:34px 26px; transition:transform .3s cubic-bezier(.34,1.56,.64,1), background .3s; }
+.step:hover { transform:translateY(-5px); background:var(--bg2); }
 .step:first-child { border-radius:14px 0 0 14px; }
 .step:last-child  { border-radius:0 14px 14px 0; }
 .step-n { font-size:10px; font-weight:700; letter-spacing:1px; color:var(--accent); text-transform:uppercase; margin-bottom:18px; display:flex; align-items:center; gap:10px; }
 .step-n::after { content:''; flex:1; height:1px; background:var(--border2); }
-.step-icon { width:42px; height:42px; background:rgba(201,169,110,0.08); border:1px solid rgba(201,169,110,0.15); border-radius:10px; display:flex; align-items:center; justify-content:center; margin-bottom:18px; }
+.step-icon { width:42px; height:42px; background:rgba(215,255,63,0.08); border:1px solid rgba(215,255,63,0.18); border-radius:10px; display:flex; align-items:center; justify-content:center; margin-bottom:18px; transition:transform .3s cubic-bezier(.34,1.56,.64,1); }
+.step:hover .step-icon { transform:rotate(-8deg) scale(1.08); }
 .step-icon svg { width:20px; height:20px; stroke:var(--accent); }
 .step h3 { font-size:17px; font-weight:700; margin-bottom:9px; letter-spacing:-0.02em; }
 .step p { font-size:13px; color:var(--muted); line-height:1.65; }
 
 /* ── GRID3 ── */
 .grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
-.vcard { background:var(--card); border:1px solid var(--border2); border-radius:14px; padding:30px; transition:border-color .2s; }
-.vcard:hover { border-color:rgba(201,169,110,0.22); }
-.vcard-icon { width:44px; height:44px; background:rgba(201,169,110,0.08); border:1px solid rgba(201,169,110,0.14); border-radius:11px; display:flex; align-items:center; justify-content:center; margin-bottom:18px; }
+.vcard { background:var(--card); border:1px solid var(--border2); border-radius:14px; padding:30px; transition:transform .3s cubic-bezier(.34,1.56,.64,1), border-color .3s, box-shadow .3s; }
+.vcard:hover { transform:translateY(-6px) rotate(-0.5deg); border-color:rgba(255,77,148,0.35); box-shadow:0 20px 40px rgba(215,255,63,0.07); }
+.vcard-icon { width:44px; height:44px; background:rgba(215,255,63,0.08); border:1px solid rgba(215,255,63,0.16); border-radius:11px; display:flex; align-items:center; justify-content:center; margin-bottom:18px; transition:transform .3s cubic-bezier(.34,1.56,.64,1); }
+.vcard:hover .vcard-icon { transform:rotate(10deg) scale(1.1); }
 .vcard-icon svg { width:22px; height:22px; stroke:var(--accent); }
+.vcard:nth-child(2) .vcard-icon { background:rgba(255,77,148,0.09); border-color:rgba(255,77,148,0.2); }
+.vcard:nth-child(2) .vcard-icon svg { stroke:var(--accent2); }
+.vcard:nth-child(3) .vcard-icon { background:rgba(94,234,212,0.09); border-color:rgba(94,234,212,0.22); }
+.vcard:nth-child(3) .vcard-icon svg { stroke:var(--accent3); }
 .vcard h3 { font-size:16px; font-weight:700; margin-bottom:8px; letter-spacing:-0.02em; }
 .vcard p { font-size:13px; color:var(--muted); line-height:1.65; }
 
@@ -257,22 +308,25 @@ h2 {
   border:1px solid var(--border2); border-radius:22px; padding:52px;
   position:relative; overflow:hidden;
 }
-.trust-wm { position:absolute; right:32px; bottom:24px; opacity:.03; pointer-events:none; }
+.trust-wm { position:absolute; right:32px; bottom:24px; opacity:.04; pointer-events:none; }
 .trust-block h2 { font-size:30px; margin-bottom:18px; }
 .trust-block p { color:var(--muted); font-size:15px; line-height:1.85; max-width:660px; margin-bottom:30px; }
 .badges { display:flex; gap:8px; flex-wrap:wrap; }
 .tbadge {
   display:inline-flex; align-items:center; gap:5px;
-  font-size:11px; color:var(--accent); font-weight:600;
-  border:1px solid rgba(201,169,110,0.2);
+  font-size:11px; color:var(--accent2); font-weight:600;
+  border:1px solid rgba(255,77,148,0.25);
   padding:5px 12px; border-radius:20px;
-  background:rgba(201,169,110,0.05);
+  background:rgba(255,77,148,0.06);
+  transition: transform .2s cubic-bezier(.34,1.56,.64,1);
 }
+.tbadge:hover { transform:translateY(-2px) scale(1.05); }
 .tbadge::before { content:'✓'; }
 
 /* ── FOUNDER ── */
 .founder-wrap { max-width:700px; margin:0 auto; text-align:center; }
-.founder-icon { width:52px; height:52px; margin:0 auto 26px; background:rgba(201,169,110,0.08); border:1px solid rgba(201,169,110,0.18); border-radius:13px; display:flex; align-items:center; justify-content:center; }
+.founder-icon { width:52px; height:52px; margin:0 auto 26px; background:var(--card); border:1px solid var(--border2); border-radius:13px; display:flex; align-items:center; justify-content:center; }
+.founder-icon svg { stroke:white; }
 .founder-wrap blockquote { font-size:19px; font-style:italic; line-height:1.78; color:var(--text); font-weight:400; margin-bottom:20px; }
 blockquote::before { content:'"'; } blockquote::after { content:'"'; }
 .founder-by { font-size:13px; color:var(--muted); }
@@ -282,26 +336,31 @@ blockquote::before { content:'"'; } blockquote::after { content:'"'; }
 details { border-bottom:1px solid var(--border); padding:20px 0; }
 summary { cursor:pointer; font-weight:600; font-size:15px; list-style:none; display:flex; justify-content:space-between; align-items:center; gap:16px; }
 summary::-webkit-details-marker { display:none; }
-.fq { width:26px; height:26px; border-radius:50%; background:var(--card); border:1px solid var(--border2); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:17px; font-weight:300; color:var(--muted); transition:all .2s; }
-details[open] .fq { background:rgba(201,169,110,.1); border-color:rgba(201,169,110,.2); color:var(--accent); }
+.fq { width:26px; height:26px; border-radius:50%; background:var(--card); border:1px solid var(--border2); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:17px; font-weight:300; color:var(--muted); transition:all .25s cubic-bezier(.34,1.56,.64,1); }
+details[open] .fq { background:rgba(215,255,63,.12); border-color:rgba(215,255,63,.3); color:var(--accent); transform:rotate(180deg); }
 .fq::after { content:'+'; } details[open] .fq::after { content:'−'; }
 details p { color:var(--muted); margin-top:12px; font-size:14px; line-height:1.75; }
+summary:hover { color:var(--accent2); }
 
 /* ── ADVERTISER ── */
 .adv { background:var(--card); border-top:1px solid var(--border2); border-bottom:1px solid var(--border2); padding:96px 24px; }
 .adv-inner { max-width:760px; margin:0 auto; }
 .adv-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:36px 0 40px; }
-.astat { background:var(--bg2); border:1px solid var(--border2); border-radius:12px; padding:22px; }
+.astat { background:var(--bg2); border:1px solid var(--border2); border-radius:12px; padding:22px; transition:transform .25s cubic-bezier(.34,1.56,.64,1); }
+.astat:hover { transform:translateY(-4px); }
 .astat-n { font-size:26px; font-weight:800; color:var(--accent); letter-spacing:-0.03em; margin-bottom:5px; }
+.astat:nth-child(2) .astat-n { color:var(--accent2); }
+.astat:nth-child(3) .astat-n { color:var(--accent3); }
 .astat-l { font-size:12px; color:var(--muted); }
 
 /* ── FOOTER CTA ── */
 .fcta { padding:120px 24px; text-align:center; position:relative; overflow:hidden; }
-.fcta::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at center, rgba(201,169,110,0.07) 0%, transparent 60%); }
+.fcta::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at center, rgba(255,77,148,0.09) 0%, transparent 60%); }
 .fcta > * { position:relative; }
-.fcta-icon { width:64px; height:64px; margin:0 auto 32px; background:rgba(201,169,110,0.08); border:1px solid rgba(201,169,110,0.18); border-radius:16px; display:flex; align-items:center; justify-content:center; }
+.fcta-icon { width:64px; height:64px; margin:0 auto 32px; background:var(--card); border:1px solid var(--border2); border-radius:16px; display:flex; align-items:center; justify-content:center; animation:iconBob 3s ease-in-out infinite; }
+@keyframes iconBob { 0%,100%{ transform:translateY(0) rotate(0deg); } 50%{ transform:translateY(-8px) rotate(-6deg); } }
 .fcta h2 { font-size:clamp(34px,5vw,58px); margin-bottom:30px; line-height:1.05; }
-.fcta h2 span { background:linear-gradient(120deg,var(--accent3),var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.fcta h2 span { background:linear-gradient(120deg,var(--accent3),var(--accent),var(--accent2)); background-size:200% auto; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation:gradShift 6s ease-in-out infinite; display:inline-block; }
 .fcta-note { margin-top:18px; font-size:13px; color:var(--dim); }
 
 /* ── FOOTER ── */
@@ -309,7 +368,7 @@ footer { border-top:1px solid var(--border); padding:28px 48px; display:flex; al
 .flogo { display:flex; align-items:center; gap:8px; font-size:15px; font-weight:800; letter-spacing:-0.03em; }
 .flinks { display:flex; gap:22px; }
 .flinks a { font-size:13px; color:var(--muted); text-decoration:none; transition:color .2s; }
-.flinks a:hover { color:var(--text); }
+.flinks a:hover { color:var(--accent2); }
 .fright { font-size:12px; color:var(--dim); }
 
 @media(max-width:768px) {
@@ -321,6 +380,7 @@ footer { border-top:1px solid var(--border); padding:28px 48px; display:flex; al
   .stats { flex-direction:column; }
   .stat { border-right:none; border-bottom:1px solid var(--border2); }
   footer { flex-direction:column; }
+  .blob { display:none; }
 }
 </style>
 </head>
@@ -342,12 +402,14 @@ footer { border-top:1px solid var(--border); padding:28px 48px; display:flex; al
     <a href="#advertise">Advertisers</a>
     <a href="#faq">FAQ</a>
     <a href="https://github.com/lull-app/lull-extension" target="_blank">GitHub</a>
-    <a class="btn-nav" href="https://github.com/lull-app/lull-extension/releases">Install free</a>
+    <a class="btn-nav" href="https://github.com/lull-app/lull-extension/releases">Get lull free</a>
   </div>
 </nav>
 
 <!-- HERO -->
 <header class="hero">
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
   <div class="hero-wm">
     <svg width="640" height="640" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="0.35" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="12" cy="12" r="9.5"/>
@@ -357,24 +419,24 @@ footer { border-top:1px solid var(--border); padding:28px 48px; display:flex; al
 
   <div class="eyebrow">
     <span class="eyebrow-pulse"></span>
-    Open source · VS Code + Cursor · Free forever
+    Open source · VS Code + Cursor · free forever, no asterisks
   </div>
 
-  <h1>Your AI thinks.<br><span class="grad">You get paid.</span><br><span class="pale">Finally.</span></h1>
+  <h1>Your AI is thinking.<br><span class="grad">Get paid for that.</span><br><span class="pale">Finally.</span></h1>
 
-  <p class="hero-sub">One quiet sponsor card in your IDE while Claude or Cursor generates. You keep 70% of ad revenue — every session, automatically.</p>
+  <p class="hero-sub">One tiny sponsor card shows up in your IDE every time Claude or Cursor is generating. You bank 70% of what it earns — every session, zero effort, automatically.</p>
 
   <div class="hero-btns">
     <a class="btn-primary" href="https://github.com/lull-app/lull-extension/releases">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      Install Lull — free
+      Install lull — free
     </a>
     <a class="btn-ghost" href="https://github.com/lull-app/lull-extension" target="_blank">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.741 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
-      View source
+      Peek at the code
     </a>
   </div>
-  <p class="hero-note">No sign-up. No data. Just install and earn.</p>
+  <p class="hero-note">No sign-up. No data harvesting. Just install and start banking spinner money.</p>
 
   <!-- DEMO WIDGET -->
   <div class="demo-wrap">
@@ -382,14 +444,14 @@ footer { border-top:1px solid var(--border); padding:28px 48px; display:flex; al
     <div class="demo">
       <div class="demo-bar">
         <div class="demo-dots"><div class="dd dd-r"></div><div class="dd dd-y"></div><div class="dd dd-g"></div></div>
-        <span class="demo-title">LULL · IDE Sidebar</span>
+        <span class="demo-title">LULL · while-you-wait slot</span>
       </div>
       <div class="demo-body">
         <div class="demo-toprow">
           <div class="demo-spinner-row"><div class="spin"></div> Claude is thinking…</div>
           <span class="demo-spons">Sponsored</span>
         </div>
-        <div class="ad-card">
+        <div class="ad-card" id="adCard">
           <div class="ad-accent" id="dAccent"></div>
           <div class="ad-inner">
             <div class="ad-brand">
@@ -402,7 +464,7 @@ footer { border-top:1px solid var(--border); padding:28px 48px; display:flex; al
         </div>
         <div class="demo-footnote">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.4"><circle cx="12" cy="12" r="9.5"/><path d="M3.8 13.6 C 5.8 7.8, 13 5.8, 16 10 C 18 12.8, 15.9 15.8, 13.4 14.9 C 11.7 14.3, 12.2 11.7, 14 12.3"/></svg>
-          lull · live preview · your ad here
+          live preview · this could be your logo
         </div>
       </div>
     </div>
@@ -411,10 +473,10 @@ footer { border-top:1px solid var(--border); padding:28px 48px; display:flex; al
 
 <!-- STATS -->
 <div class="wrap">
-  <div class="stats">
-    <div class="stat"><div class="stat-n">70%</div><div class="stat-l">Revenue share — yours, always</div></div>
-    <div class="stat"><div class="stat-n">$10–20</div><div class="stat-l">CPM for senior dev audience</div></div>
-    <div class="stat"><div class="stat-n">0s</div><div class="stat-l">Setup after install</div></div>
+  <div class="stats reveal">
+    <div class="stat"><div class="stat-n">70%</div><div class="stat-l">Yours. Not ours, not a 50/50 split.</div></div>
+    <div class="stat"><div class="stat-n">$10–20</div><div class="stat-l">CPM — dev eyeballs aren't cheap</div></div>
+    <div class="stat"><div class="stat-n">0s</div><div class="stat-l">Setup time. We timed it.</div></div>
   </div>
 </div>
 
@@ -423,27 +485,27 @@ footer { border-top:1px solid var(--border); padding:28px 48px; display:flex; al
 <!-- HOW IT WORKS -->
 <section class="section" id="how">
   <div class="wrap">
-    <div class="label">How it works</div>
-    <h2>One install.<br>Then it runs itself.</h2>
-    <p class="sub">Lull works in the background. You code. You earn.</p>
+    <div class="label reveal">How it works</div>
+    <h2 class="reveal">Install once.<br>Then get out of the way.</h2>
+    <p class="sub reveal">lull runs quietly in the background. You code, you ship, your balance creeps up.</p>
     <div class="steps">
-      <div class="step">
+      <div class="step reveal">
         <div class="step-n">01</div>
         <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
-        <h3>Install once</h3>
-        <p>Download the .vsix, install in VS Code or Cursor. Click the Lull icon. Done — under 60 seconds.</p>
+        <h3>Slap it in</h3>
+        <p>Download the .vsix, install in VS Code or Cursor, click the lull icon. Done — under 60 seconds, no config screens.</p>
       </div>
-      <div class="step">
+      <div class="step reveal">
         <div class="step-n">02</div>
         <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
-        <h3>Code like normal</h3>
-        <p>Use Claude or Cursor exactly as you always do. During every AI pause a single quiet card appears.</p>
+        <h3>Code like you always do</h3>
+        <p>Use Claude or Cursor exactly as normal. Every time the AI pauses to think, one quiet sponsor card appears.</p>
       </div>
-      <div class="step">
+      <div class="step reveal">
         <div class="step-n">03</div>
         <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-        <h3>Earn and cash out</h3>
-        <p>Your balance grows with every impression. Cash out in USDC or via Stripe — real money, no points.</p>
+        <h3>Cash out like a boss</h3>
+        <p>Your balance grows with every impression. Cash out in USDC or via Stripe — real money, no points, no gimmicks.</p>
       </div>
     </div>
   </div>
@@ -454,24 +516,24 @@ footer { border-top:1px solid var(--border); padding:28px 48px; display:flex; al
 <!-- WHY LULL -->
 <section class="section">
   <div class="wrap">
-    <div class="label">Why Lull</div>
-    <h2>Built different.<br>By design.</h2>
-    <p class="sub">Most passive income tools are a trap. Lull is built so you never have to trust us.</p>
+    <div class="label reveal">Why lull</div>
+    <h2 class="reveal">We're weird about trust.<br>On purpose.</h2>
+    <p class="sub reveal">Most "passive income" pitches are a trap with extra steps. lull is built so you never have to take our word for anything.</p>
     <div class="grid3">
-      <div class="vcard">
+      <div class="vcard reveal">
         <div class="vcard-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
-        <h3>Fully open source</h3>
-        <p>Every line is on GitHub under MIT. Read it, audit it, fork it. We can't hide anything — that's the point.</p>
+        <h3>100% open, 0% shady</h3>
+        <p>Every line is on GitHub under MIT. Read it, audit it, fork it. We can't hide anything — that's the entire point.</p>
       </div>
-      <div class="vcard">
+      <div class="vcard reveal">
         <div class="vcard-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-        <h3>Zero data collection</h3>
-        <p>Lull never reads your prompts or code. It only detects that a generation started — nothing else.</p>
+        <h3>We don't want your secrets</h3>
+        <p>lull never reads your prompts or your code. It only detects that a generation started — nothing else, ever.</p>
       </div>
-      <div class="vcard">
+      <div class="vcard reveal">
         <div class="vcard-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-        <h3>70% to you</h3>
-        <p>Industry standard is 50%. We give you 70% — because the model breaks if developers aren't treated like partners.</p>
+        <h3>70% is yours. Math, not marketing.</h3>
+        <p>Industry standard is a 50% cut. We give you 70% — because the model collapses if developers aren't treated like partners.</p>
       </div>
     </div>
   </div>
@@ -482,7 +544,7 @@ footer { border-top:1px solid var(--border); padding:28px 48px; display:flex; al
 <!-- TRUST -->
 <section class="section">
   <div class="wrap">
-    <div class="trust-block">
+    <div class="trust-block reveal">
       <div class="trust-wm">
         <svg width="200" height="200" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="9.5"/>
@@ -490,8 +552,8 @@ footer { border-top:1px solid var(--border); padding:28px 48px; display:flex; al
         </svg>
       </div>
       <div class="label">Trust</div>
-      <h2>We know how this sounds.</h2>
-      <p>An ad inside your coding tools sounds like the start of a bad story. So we made Lull impossible to distrust. The entire codebase is on GitHub — not as a PR move, but because the moment we hide something, you should uninstall us. Lull never reads your prompts, your code, or your responses. The only signal it processes: a generation started, it finished. No behavioral data. No profiles. If you find one line that contradicts this, we'll have a much bigger problem than your uninstall.</p>
+      <h2>Yeah, we know how this sounds.</h2>
+      <p>An ad inside your coding tools sounds like the start of a bad story. So we made lull impossible to distrust. The entire codebase is on GitHub — not as a PR move, but because the moment we hide something, you should uninstall us on the spot. lull never reads your prompts, your code, or your responses. The only signal it processes: a generation started, then it finished. No behavioral data, no profiles, no funny business. If you find one line that contradicts this, we'll have a much bigger problem than your uninstall.</p>
       <div class="badges">
         <span class="tbadge">Open source, MIT</span>
         <span class="tbadge">No prompt access</span>
@@ -508,14 +570,14 @@ footer { border-top:1px solid var(--border); padding:28px 48px; display:flex; al
 <!-- FOUNDER -->
 <section class="section">
   <div class="wrap">
-    <div class="founder-wrap">
+    <div class="founder-wrap reveal">
       <div class="founder-icon">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="9.5"/>
           <path d="M3.8 13.6 C 5.8 7.8, 13 5.8, 16 10 C 18 12.8, 15.9 15.8, 13.4 14.9 C 11.7 14.3, 12.2 11.7, 14 12.3"/>
         </svg>
       </div>
-      <blockquote>I built Lull because I kept staring at loading spinners and realized I was donating thousands of idle seconds a day — to nobody. It's early: payouts are small, the network is young. But the math only works if developers come first. That's why you keep 70% and the code stays open.</blockquote>
+      <blockquote>I built lull because I kept staring at loading spinners and realized I was donating thousands of idle seconds a day — to nobody. It's early: payouts are small, the network is young. But the math only works if developers come first. That's why you keep 70% and the code stays open, forever.</blockquote>
       <p class="founder-by">— The founder</p>
     </div>
   </div>
@@ -526,16 +588,16 @@ footer { border-top:1px solid var(--border); padding:28px 48px; display:flex; al
 <!-- FAQ -->
 <section class="section" id="faq">
   <div class="wrap">
-    <div class="label">FAQ</div>
-    <h2>Straight answers.</h2>
-    <div class="faq-wrap" style="margin-top:44px;">
+    <div class="label reveal">FAQ</div>
+    <h2 class="reveal">Straight answers, no fine print.</h2>
+    <div class="faq-wrap reveal" style="margin-top:44px;">
       <details open>
         <summary>How much will I actually earn? <div class="fq"></div></summary>
         <p>Coffee money to start — not rent. Heavy AI users see a few dollars a month early on. As advertiser demand grows, so does your cut. We'll publish network averages publicly as the network scales.</p>
       </details>
       <details>
-        <summary>What does Lull actually see? <div class="fq"></div></summary>
-        <p>Nothing you type. Lull detects only the loading state — never prompts, code, or responses. The source is on GitHub. Don't take our word for it — read it.</p>
+        <summary>What does lull actually see? <div class="fq"></div></summary>
+        <p>Nothing you type. lull detects only the loading state — never prompts, code, or responses. The source is on GitHub. Don't take our word for it — read it.</p>
       </details>
       <details>
         <summary>Which tools are supported? <div class="fq"></div></summary>
@@ -558,15 +620,15 @@ footer { border-top:1px solid var(--border); padding:28px 48px; display:flex; al
 <!-- ADVERTISERS -->
 <section class="adv" id="advertise">
   <div class="adv-inner">
-    <div class="label">For advertisers</div>
-    <h2>Your logo in the IDE.<br>Not a text string.</h2>
-    <p class="sub" style="margin-bottom:0;">Every other dev-tool ad gives you 60 characters in a terminal. Lull shows your logo, tagline, and a CTA button in the IDE sidebar during every AI wait state. Same audience. Actually visible.</p>
+    <div class="label reveal">For advertisers</div>
+    <h2 class="reveal">Your logo in the IDE.<br>Not a 60-character afterthought.</h2>
+    <p class="sub reveal" style="margin-bottom:0;">Every other dev-tool ad gives you a text string in a terminal. lull shows your logo, tagline, and a CTA button in the IDE sidebar during every AI wait state. Same audience. Actually visible.</p>
     <div class="adv-grid">
-      <div class="astat"><div class="astat-n">$10–20</div><div class="astat-l">CPM · market rate</div></div>
-      <div class="astat"><div class="astat-n">Visual</div><div class="astat-l">Logo + tagline + CTA, not terminal text</div></div>
-      <div class="astat"><div class="astat-n">Dev-only</div><div class="astat-l">No shoe stores. Dev tools only.</div></div>
+      <div class="astat reveal"><div class="astat-n">$10–20</div><div class="astat-l">CPM · market rate</div></div>
+      <div class="astat reveal"><div class="astat-n">Visual</div><div class="astat-l">Logo + tagline + CTA, not terminal text</div></div>
+      <div class="astat reveal"><div class="astat-n">Dev-only</div><div class="astat-l">No shoe stores. Dev tools only.</div></div>
     </div>
-    <a class="btn-primary" href="mailto:lull.extension@gmail.com?subject=Lull%20Advertising%20Inquiry&body=Hi%2C%20I%27m%20interested%20in%20advertising%20with%20Lull.">Start a $500 pilot →</a>
+    <a class="btn-primary reveal" href="mailto:lull.extension@gmail.com?subject=lull%20Advertising%20Inquiry&body=Hi%2C%20I%27m%20interested%20in%20advertising%20with%20lull.">Run a $500 pilot →</a>
     <p style="margin-top:12px;font-size:12px;color:var(--dim);">CPM-based · cancel anytime · first 10 advertisers get founding rate</p>
   </div>
 </section>
@@ -579,9 +641,9 @@ footer { border-top:1px solid var(--border); padding:28px 48px; display:flex; al
       <path d="M3.8 13.6 C 5.8 7.8, 13 5.8, 16 10 C 18 12.8, 15.9 15.8, 13.4 14.9 C 11.7 14.3, 12.2 11.7, 14 12.3"/>
     </svg>
   </div>
-  <h2>The pause was always there.<br><span>Now it pays.</span></h2>
-  <a class="btn-primary" style="font-size:16px;padding:17px 38px;" href="https://github.com/lull-app/lull-extension/releases">Install Lull — free</a>
-  <p class="fcta-note">VS Code + Cursor · MIT · Free forever</p>
+  <h2 class="reveal">The spinner was always there.<br><span>Now it pays rent.</span></h2>
+  <a class="btn-primary reveal" style="font-size:16px;padding:17px 38px;" href="https://github.com/lull-app/lull-extension/releases">Install lull — free</a>
+  <p class="fcta-note">VS Code + Cursor · MIT · free forever</p>
 </section>
 
 <!-- FOOTER -->
@@ -603,28 +665,47 @@ footer { border-top:1px solid var(--border); padding:28px 48px; display:flex; al
 
 <script>
 const ads = [
-  { logo:'S', name:'Sponsor A', tag:'Your message here — during every AI wait state.', cta:'Learn more →', color:'#c9a96e' },
-  { logo:'R', name:'Sponsor B', tag:'Reach senior developers at the exact moment they build.', cta:'See pricing →', color:'#b8926e' },
-  { logo:'A', name:'Sponsor C', tag:'Visual placement. IDE sidebar. Dev-only audience.', cta:'Get started →', color:'#a08060' },
+  { logo:'S', name:'Sponsor A', tag:'Your logo here — during every AI wait state.', cta:'Learn more →', color:'#d7ff3f' },
+  { logo:'R', name:'Sponsor B', tag:'Reach senior developers at the exact moment they build.', cta:'See pricing →', color:'#ff4d94' },
+  { logo:'A', name:'Sponsor C', tag:'Visual placement. IDE sidebar. Dev-only audience.', cta:'Get started →', color:'#5eead4' },
 ];
 let i = 0;
 function hex2rgb(h){ return{r:parseInt(h.slice(1,3),16),g:parseInt(h.slice(3,5),16),b:parseInt(h.slice(5,7),16)}; }
 function render(a){
   const {r,g,b}=hex2rgb(a.color);
+  const card=document.getElementById('adCard');
+  card.classList.add('swap');
   ['dLogo','dName','dTag','dCta'].forEach(id=>{ document.getElementById(id).style.opacity=0; });
   setTimeout(()=>{
     const lo=document.getElementById('dLogo');
-    lo.textContent=a.logo; lo.style.background=`rgba(${r},${g},${b},.14)`; lo.style.color=a.color; lo.style.border=`1px solid rgba(${r},${g},${b},.25)`;
+    lo.textContent=a.logo; lo.style.background=`rgba(${r},${g},${b},.16)`; lo.style.color=a.color; lo.style.border=`1px solid rgba(${r},${g},${b},.3)`;
     document.getElementById('dName').textContent=a.name;
     document.getElementById('dTag').textContent=a.tag;
     const ct=document.getElementById('dCta');
-    ct.textContent=a.cta; ct.style.background=`rgba(${r},${g},${b},.1)`; ct.style.border=`1px solid rgba(${r},${g},${b},.28)`; ct.style.color=a.color;
-    document.getElementById('dAccent').style.background=`linear-gradient(90deg,rgba(${r},${g},${b},0),rgba(${r},${g},${b},.8),rgba(${r},${g},${b},0))`;
+    ct.textContent=a.cta; ct.style.background=`rgba(${r},${g},${b},.12)`; ct.style.border=`1px solid rgba(${r},${g},${b},.3)`; ct.style.color=a.color;
+    document.getElementById('dAccent').style.background=`linear-gradient(90deg,rgba(${r},${g},${b},0),rgba(${r},${g},${b},.85),rgba(${r},${g},${b},0))`;
     ['dLogo','dName','dTag','dCta'].forEach(id=>{ const el=document.getElementById(id); el.style.transition='opacity .3s'; el.style.opacity=1; });
+    setTimeout(()=>card.classList.remove('swap'),350);
   },280);
 }
 render(ads[0]);
-setInterval(()=>{ i=(i+1)%ads.length; render(ads[i]); },3400);
+setInterval(()=>{ i=(i+1)%ads.length; render(ads[i]); },2800);
+
+// scroll reveal
+const revealEls = document.querySelectorAll('.reveal');
+if ('IntersectionObserver' in window) {
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in-view');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  revealEls.forEach(el => io.observe(el));
+} else {
+  revealEls.forEach(el => el.classList.add('in-view'));
+}
 </script>
 
 </body>
