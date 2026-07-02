@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>lull — Get paid to stare at a spinner</title>
 <meta name="description" content="lull drops one tiny sponsor card into your IDE's loading spinner. You keep 70% of the revenue. Zero setup, zero data creepiness.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d7ff3f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9.5' fill='%230a0a0f'/%3E%3Cpath d='M3.8 13.6 C 5.8 7.8, 13 5.8, 16 10 C 18 12.8, 15.9 15.8, 13.4 14.9 C 11.7 14.3, 12.2 11.7, 14 12.3'/%3E%3C/svg%3E">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
@@ -371,12 +372,12 @@ summary:hover { color:var(--accent2); }
 .fcta-note { margin-top:18px; font-size:13px; color:var(--dim); }
 
 /* ── FOOTER ── */
-footer { border-top:1px solid var(--border); padding:28px 48px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; }
-.flogo { display:flex; align-items:center; gap:8px; font-size:15px; font-weight:800; letter-spacing:-0.03em; }
-.flinks { display:flex; gap:22px; }
+footer { border-top:1px solid var(--border); padding:28px 48px; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:14px; }
+.flogo { display:flex; align-items:center; gap:8px; font-size:15px; font-weight:800; letter-spacing:-0.03em; justify-self:start; }
+.flinks { display:flex; gap:22px; justify-self:center; }
 .flinks a { font-size:13px; color:var(--muted); text-decoration:none; transition:color .2s; }
 .flinks a:hover { color:var(--accent2); }
-.fright { font-size:12px; color:var(--dim); }
+.fright { font-size:12px; color:var(--dim); justify-self:end; }
 
 @media(max-width:768px) {
   nav { padding:16px 20px; }
@@ -386,7 +387,8 @@ footer { border-top:1px solid var(--border); padding:28px 48px; display:flex; al
   .trust-block { padding:32px 22px; }
   .stats { flex-direction:column; }
   .stat { border-right:none; border-bottom:1px solid var(--border2); }
-  footer { flex-direction:column; }
+  footer { grid-template-columns:1fr; justify-items:center; text-align:center; }
+  .flogo, .fright { justify-self:center; }
   .blob { display:none; }
 }
 </style>
